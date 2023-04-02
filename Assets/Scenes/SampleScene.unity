@@ -3011,7 +3011,7 @@ MonoBehaviour:
   movementSmoothing: 0.75
   scrollSensitivity: 1.6
   DifficultyLevel: 5
-  gold: 50
+  gold: 500
   stageLayerMask:
     serializedVersion: 2
     m_Bits: 1
@@ -3043,7 +3043,8 @@ MonoBehaviour:
   flyingEnemyPrefab: {fileID: 991746321665488439, guid: 8c39df7507436464b861b64729704611, type: 3}
   flyingArmoredEnemyPrefab: {fileID: 390037080352225283, guid: 26d6887f194734447a7aa87316dd6723, type: 3}
   enemySpawnRate: 0.35
-  flyingLevelInterval: 1
+  flyingLevelInterval: 4
+  mixedLevelInterval: 6
   enemiesPerLevel: 15
   goldRewardPerLevel: 12
 --- !u!1 &978409623 stripped

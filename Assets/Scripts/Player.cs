@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
 using System;
+using System.Linq;
 
 public class Player : MonoBehaviour
 {
@@ -175,6 +176,7 @@ public class Player : MonoBehaviour
         "Determines how often flying enemy levels occur.  For example if this is set to 4, every 4th level is a flying level."
     )]
     public int flyingLevelInterval = 4;
+    public int mixedLevelInterval = 6;
 
     [Tooltip("Number of enemies spawned each level.")]
     public int enemiesPerLevel = 15;
@@ -540,6 +542,9 @@ public class Player : MonoBehaviour
 
         //var upgradeDamageBtn = GameObject.Find("Upgrade Damage Button");
 
+        if (selectedTower == null)
+            return;
+
         sellRefundText.text =
             "Sell for "
             + Mathf.CeilToInt(
@@ -887,6 +892,25 @@ public class Player : MonoBehaviour
 
             enemies.Add(enemy);
         }
+        else if (level % mixedLevelInterval == 0)
+        {
+            if (randomNum >= 25)
+            {
+                enemy = Instantiate(
+                    flyingEnemyPrefab,
+                    spawnPoint.position + (Vector3.up * 18),
+                    Quaternion.LookRotation(Vector3.back)
+                );
+            }
+            else
+            {
+                enemy = Instantiate(
+                    groundEnemyPrefab,
+                    spawnPoint.position,
+                    Quaternion.LookRotation(Vector3.back)
+                );
+            }
+        }
         else //If it's a ground level
         {
             if (randomNum > numberToMakeEnemyArmored)
@@ -1021,6 +1045,16 @@ public class Player : MonoBehaviour
         }
 
         SetAvailableBuildButtons();
+        ClearSelfDestructingTowers();
+    }
+
+    void ClearSelfDestructingTowers()
+    {
+        foreach (var i in towers.Where(d => d.Value.ToString().Contains("Bomb Plate")).ToList())
+        {
+            towers.Remove(i.Key);
+            Destroy(i.Value.gameObject);
+        }
     }
 
     void SetAvailableBuildButtons()

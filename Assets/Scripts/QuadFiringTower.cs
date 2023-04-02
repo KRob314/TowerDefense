@@ -27,7 +27,6 @@ public class QuadFiringTower : FiringTower
 
     //private Enemy targetedEnemyNew;
 
-    //private float lastFireTime = Mathf.NegativeInfinity;
     private float lastFireTime1 = Mathf.NegativeInfinity;
     private float lastFireTime2 = Mathf.NegativeInfinity;
     private float lastFireTime3 = Mathf.NegativeInfinity;

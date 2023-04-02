@@ -34,9 +34,9 @@ public class Bomb : TargetingTower
             }
         }
 
-       // Debug.Log(explodeTime);
+        // Debug.Log(explodeTime);
         //Debug.Log(Time.time - explodeTime);
-       // Debug.Log("--");
+        // Debug.Log("--");
         /*
                 if (
                     explodeTime != Mathf.NegativeInfinity
@@ -48,7 +48,7 @@ public class Bomb : TargetingTower
                 */
     }
 
-    void Start()
+    protected override void Start()
     {
         var particleSystem = GetComponent<ParticleSystem>();
         particleSystem.Pause();
@@ -75,6 +75,7 @@ public class Bomb : TargetingTower
             }
         }
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+        //Destroy(gameObject);
     }
 }
