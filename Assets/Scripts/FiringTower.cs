@@ -34,12 +34,14 @@ public class FiringTower : TargetingTower
     [Tooltip("Units per second travel speed for projectiles.")]
     public float projectileSpeed = 60;
 
-    private Enemy targetedEnemy;
+    [HideInInspector]
+    protected Enemy targetedEnemy;
 
-    private float lastFireTime = Mathf.NegativeInfinity;
+    [HideInInspector]
+    protected float lastFireTime = Mathf.NegativeInfinity;
 
     //Methods:
-    private void AimAtTarget()
+    protected virtual void AimAtTarget()
     {
         //If the 'aimer' has been set, make it look at the enemy on the Y axis only:
         if (aimer)
@@ -62,12 +64,12 @@ public class FiringTower : TargetingTower
         }
     }
 
-    private void GetNextTarget()
+    protected void GetNextTarget()
     {
         targetedEnemy = targeter.GetClosestEnemy(trans.position);
     }
 
-    private void Fire()
+    protected virtual void Fire()
     {
         //Mark the time we fired:
         lastFireTime = Time.time;

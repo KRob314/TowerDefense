@@ -1025,6 +1025,11 @@ public class Player : MonoBehaviour
 
     void SetAvailableBuildButtons()
     {
+        if (!buildButtonPanel.activeInHierarchy)
+        {
+            return;
+        }
+
         //Debug.Log("SetAvailableBuildButtons()");
         var doubleArrowBuildBtn = GameObject.Find("Build Button (5)").GetComponent<Button>();
         var cannonBuildBtn = GameObject.Find("Build Button (1)").GetComponent<Button>();

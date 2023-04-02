@@ -12,45 +12,16 @@ public class DualFiringAATower : FiringTower
     [Tooltip("Reference to the projectile prefab that should be fired.")]
     public Projectile projectilePrefab2;
 
-    private Enemy targetedEnemyNew;
-
-    private float lastFireTimeNew = Mathf.NegativeInfinity;
+    // private float lastFireTimeNew = Mathf.NegativeInfinity;
     private Quaternion defaultAimerRotation;
     private Vector3 defaultAimerPosition;
 
     //Methods:
-    private void AimAtTarget()
-    {
-        //If the 'aimer' has been set, make it look at the enemy on the Y axis only:
-        if (aimer)
-        {
-            //Get to and from positions, but set both Y values to 0:
-            Vector3 to = targetedEnemyNew.trans.position;
-            //to.y = 0;
 
-            Vector3 from = aimer.position;
-            //from.y = 0;
-
-            //Get desired rotation to look from the 'from' position to the 'to' position:
-            Quaternion desiredRotation = Quaternion.LookRotation(
-                (to - from).normalized,
-                Vector3.up
-            );
-
-            //Slerp current rotation towards the desired rotation:
-            aimer.rotation = Quaternion.Slerp(aimer.rotation, desiredRotation, .08f);
-        }
-    }
-
-    private void GetNextTarget()
-    {
-        targetedEnemyNew = targeter.GetClosestEnemy(trans.position);
-    }
-
-    private void Fire()
+    protected override void Fire()
     {
         //Mark the time we fired:
-        lastFireTimeNew = Time.time;
+        lastFireTime = Time.time;
 
         //Spawn projectile prefab at spawn point, using spawn point rotation:
         var proj = Instantiate<Projectile>(
@@ -66,19 +37,19 @@ public class DualFiringAATower : FiringTower
         );
 
         //Setup the projectile with damage, speed, and target enemy:
-        proj.Setup(damage, projectileSpeed, targetedEnemyNew);
-        proj2.Setup(damage, projectileSpeed, targetedEnemyNew);
+        proj.Setup(damage, projectileSpeed, targetedEnemy);
+        proj2.Setup(damage, projectileSpeed, targetedEnemy);
     }
 
     //Unity events:
     protected override void Update()
     {
-        if (targetedEnemyNew != null) //If there is a targeted enemy
+        if (targetedEnemy != null) //If there is a targeted enemy
         {
             //If the enemy is dead or is not in range anymore, get a new target:
             if (
-                !targetedEnemyNew.alive
-                || Vector3.Distance(trans.position, targetedEnemyNew.trans.position) > range
+                !targetedEnemy.alive
+                || Vector3.Distance(trans.position, targetedEnemy.trans.position) > range
             )
             {
                 GetNextTarget();
@@ -86,15 +57,15 @@ public class DualFiringAATower : FiringTower
             else //If the enemy is alive and in range,
             {
                 if (
-                    (canAttackFlying && targetedEnemyNew is FlyingEnemy)
-                    || (canAttackGround && targetedEnemyNew is GroundEnemy)
+                    (canAttackFlying && targetedEnemy is FlyingEnemy)
+                    || (canAttackGround && targetedEnemy is GroundEnemy)
                 )
                 {
                     //Aim at the enemy:
                     AimAtTarget();
 
                     //Check if it's time to fire again:
-                    if (Time.time > lastFireTimeNew + fireInterval)
+                    if (Time.time > lastFireTime + fireInterval)
                     {
                         Fire();
                     }
