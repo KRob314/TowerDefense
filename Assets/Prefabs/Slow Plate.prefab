@@ -224,6 +224,9 @@ MonoBehaviour:
   upgradesBought: 0
   upgradeCost: 5
   upgradeCostForRateOfFire: 10
+  canUpgradeDamage: 0
+  canUpgradeSpeed: 0
+  canUpgradeRange: 0
   refundFactor: 0.5
   targeter: {fileID: 6952783867247231772}
   range: 5

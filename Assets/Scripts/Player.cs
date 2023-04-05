@@ -22,16 +22,8 @@ public class Player : MonoBehaviour
     }
 
     private Mode mode = Mode.Build;
-    private int DifficultyFactor
-    {
-        get
-        {
-            if (DifficultyLevel == Difficulty.Hard)
-                return 5;
-            else
-                return 0;
-        }
-    }
+
+    private int DifficultyFactor = 0;
 
     private List<Enemy> enemies = new List<Enemy>();
 
@@ -194,6 +186,10 @@ public class Player : MonoBehaviour
     public static int remainingLives = 40;
 
     private Color towerDefaultColor;
+
+    private GameObject upgradeDamageButton = null;
+    private GameObject upgradeSpeedButton = null;
+    private GameObject upgradeRangeButton = null;
 
     //private List<Transform> buildButtons = new List<Transform>();
 
@@ -358,11 +354,14 @@ public class Player : MonoBehaviour
     {
         //Debug.Log("OnStageClicked()");
 
+
         //upgrade panel showing, don't trigger objects behind it
         if (towerActionsPanel.gameObject.activeInHierarchy)
         {
             return;
         }
+
+        ClearHighlightedTowers();
 
         //If a build button is selected:
         if (towerPrefabToBuild != null)
@@ -375,8 +374,9 @@ public class Player : MonoBehaviour
             else //selected area already has a tower so guessing they want to upgrade
             {
                 DeselectBuildButton();
-                UpdateTowerActionPanel();
+                selectedTower = towers[highlighter.position];
                 towerActionsPanel.gameObject.SetActive(true);
+                UpdateTowerActionPanel();
             }
         }
         //If no build button is selected:
@@ -387,40 +387,23 @@ public class Player : MonoBehaviour
             {
                 //Set the selected tower to this one:
                 selectedTower = towers[highlighter.position];
-                /*
-                                if (towerDefaultColor == null)
-                                    towerDefaultColor = selectedTower
-                                        .GetComponentInChildren<Renderer>()
-                                        .material.GetColor("_Color");
-                
-                                if (
-                                    selectedTower.GetComponentInChildren<Renderer>().material.GetColor("_Color")
-                                    == towerDefaultColor
-                                )
-                                {
-                                    selectedTower
-                                        .GetComponentInChildren<Renderer>()
-                                        .material.SetColor("_Color", Color.white);
-                                }
-                                else
-                                {
-                                    selectedTower
-                                        .GetComponentInChildren<Renderer>()
-                                        .material.SetColor("_Color", towerDefaultColor);
-                                }
-                
-                                //Debug.Log(selectedTower);
-                
-                                Debug.Log(towerDefaultColor);
-                                */
+                selectedTower.HighlightTower();
 
+                towerActionsPanel.gameObject.SetActive(true);
                 UpdateTowerActionPanel();
 
                 //Make sure the sell tower UI panel is active so it shows:
                 //towerSellingPanel.gameObject.SetActive(true);
                 //towerUpgradePanel.gameObject.SetActive(true);
-                towerActionsPanel.gameObject.SetActive(true);
             }
+        }
+    }
+
+    private void ClearHighlightedTowers()
+    {
+        foreach (var tower in towers.Values.Where(t => t.towerIsHighlighted))
+        {
+            tower.UnHighlightTower();
         }
     }
 
@@ -538,12 +521,18 @@ public class Player : MonoBehaviour
 
     void UpdateTowerActionPanel()
     {
-        //Debug.Log("UpdateTowerActionPanel()");
-
-        //var upgradeDamageBtn = GameObject.Find("Upgrade Damage Button");
+        //Debug.Log("UpdateTowerActionPanel");
+        // Debug.Log(selectedTower);
 
         if (selectedTower == null)
             return;
+
+        if (upgradeDamageButton == null)
+        {
+            upgradeDamageButton = GameObject.Find("Upgrade Damage Button");
+            upgradeSpeedButton = GameObject.Find("Upgrade RateOfFire Button");
+            upgradeRangeButton = GameObject.Find("Upgrade Range Button");
+        }
 
         sellRefundText.text =
             "Sell for "
@@ -585,14 +574,22 @@ public class Player : MonoBehaviour
                 towerStatsText.text =
                     $"Dmg/s: {towerTemp.damagePerSecond}{Environment.NewLine}Speed Reduction: {towerTemp.slowDownRate}:";
             }
-
-            //Debug.Log(towerTemp.name);
-            /* if (towerTemp.name == "Slow Plate(Clone)")
-             {
-                 GameObject upgradeDamageButton = GameObject.Find("Upgrade Damage Button");
-                 upgradeDamageButton.SetActive(false);
-             }*/
         }
+
+        if (!selectedTower.canUpgradeDamage)
+            upgradeDamageButton.SetActive(false);
+        else
+            upgradeDamageButton.SetActive(true);
+
+        if (!selectedTower.canUpgradeSpeed)
+            upgradeSpeedButton.SetActive(false);
+        else
+            upgradeSpeedButton.SetActive(true);
+
+        if (!selectedTower.canUpgradeRange)
+            upgradeRangeButton.SetActive(false);
+        else
+            upgradeRangeButton.SetActive(true);
     }
 
     void BuildTower(Tower prefab, Vector3 position)
@@ -753,6 +750,7 @@ public class Player : MonoBehaviour
 
     public void DeselectTower()
     {
+        ClearHighlightedTowers();
         //Null selected tower and hide the sell tower panel:
         selectedTower = null;
         //towerSellingPanel.gameObject.SetActive(false);
@@ -1013,6 +1011,7 @@ public class Player : MonoBehaviour
 
         //Deactivate highlighter:
         highlighter.gameObject.SetActive(false);
+        ClearHighlightedTowers();
     }
 
     void GoToBuildMode()
@@ -1071,6 +1070,7 @@ public class Player : MonoBehaviour
         var machineGuneBuildBtn = GameObject.Find("Build Button (7)").GetComponent<Button>();
         var laserBuildBtn = GameObject.Find("Build Button (4)").GetComponent<Button>();
         var bombBuildBtn = GameObject.Find("Build Button (8)").GetComponent<Button>();
+        var aaBuildBtn = GameObject.Find("Build Button (9)").GetComponent<Button>();
 
         if (level < 3)
         {
@@ -1087,11 +1087,13 @@ public class Player : MonoBehaviour
         {
             cannonBuildBtn.interactable = false;
             slowPlateBuildBtn.interactable = false;
+            aaBuildBtn.interactable = false;
         }
         else
         {
             cannonBuildBtn.interactable = true;
             slowPlateBuildBtn.interactable = true;
+            aaBuildBtn.interactable = true;
         }
 
         if (level < 10)
@@ -1144,20 +1146,10 @@ public class Player : MonoBehaviour
 
     private void SetDifficultySettings()
     {
-        if (DifficultyLevel == Difficulty.Hard)
-        {
-            gold -= DifficultyFactor;
-            enemiesPerLevel += DifficultyFactor;
-            goldRewardPerLevel -= DifficultyFactor;
-            remainingLives -= DifficultyFactor;
-        }
-        else if (DifficultyLevel == Difficulty.Easy)
-        {
-            gold += DifficultyFactor;
-            enemiesPerLevel -= DifficultyFactor;
-            goldRewardPerLevel += DifficultyFactor;
-            remainingLives += DifficultyFactor;
-        }
+        gold -= DifficultyFactor;
+        enemiesPerLevel += DifficultyFactor;
+        goldRewardPerLevel -= DifficultyFactor;
+        remainingLives -= DifficultyFactor;
     }
 
     public void OnExchangeLivesForGold()
@@ -1177,7 +1169,6 @@ public class Player : MonoBehaviour
         targetPosition = trans.position;
         GroundEnemy.path = new NavMeshPath();
         UpdateEnemyPath();
-        SetAvailableBuildButtons();
     }
 
     void OnGUI()
@@ -1242,30 +1233,13 @@ public class Player : MonoBehaviour
             PlayModeLogic();
     }
 
-    public void OnSetDifficultyEasy()
+    public void OnSetDifficulty(int difficulty)
     {
-        DifficultyLevel = Difficulty.Easy;
+        DifficultyFactor = difficulty;
         SetDifficultySettings();
         settingsPanel.gameObject.SetActive(false);
         gamePlayPanel.gameObject.SetActive(true);
         buildButtonPanel.SetActive(true);
-    }
-
-    public void OnSetDifficultyNormal()
-    {
-        DifficultyLevel = Difficulty.Normal;
-        SetDifficultySettings();
-        settingsPanel.gameObject.SetActive(false);
-        gamePlayPanel.gameObject.SetActive(true);
-        buildButtonPanel.SetActive(true);
-    }
-
-    public void OnSetDifficultyHard()
-    {
-        DifficultyLevel = Difficulty.Hard;
-        SetDifficultySettings();
-        settingsPanel.gameObject.SetActive(false);
-        gamePlayPanel.gameObject.SetActive(true);
-        buildButtonPanel.SetActive(true);
+        SetAvailableBuildButtons();
     }
 }

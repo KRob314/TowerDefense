@@ -257,12 +257,18 @@ MonoBehaviour:
   upgradesBought: 0
   upgradeCost: 2
   upgradeCostForRateOfFire: 10
+  canUpgradeDamage: 1
+  canUpgradeSpeed: 1
+  canUpgradeRange: 1
+  defaultMaterial: {fileID: 2100000, guid: 1ce254c3fe009b141a5d8e830e375b30, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 9eea0ba81f666f741a290afc1376b544, type: 2}
   refundFactor: 0.5
   targeter: {fileID: 5739652139954294062}
   range: 45
   damagePerSecond: 0
   slowDownRate: 2
   canAttackFlying: 1
+  canAttackGround: 1
   trans: {fileID: 5739652141152591556}
   projectileSpawnPoint: {fileID: 5739652140716004883}
   aimer: {fileID: 5739652141677407930}

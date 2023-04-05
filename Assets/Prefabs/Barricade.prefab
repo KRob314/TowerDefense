@@ -47,6 +47,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   goldCost: 2
+  upgradesBought: 0
+  upgradeCost: 2
+  upgradeCostForRateOfFire: 10
+  canUpgradeDamage: 0
+  canUpgradeSpeed: 0
+  canUpgradeRange: 0
   refundFactor: 0.5
 --- !u!208 &2475007316415340417
 NavMeshObstacle:
