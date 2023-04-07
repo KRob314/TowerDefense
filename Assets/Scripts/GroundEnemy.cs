@@ -56,5 +56,16 @@ public class GroundEnemy : Enemy
             else
                 GetNextCorner();
         }
+
+        /*
+                foreach (var towerItem in _towers)
+                {
+                    if (towerItem.Key.z >= trans.position.z - 5 && towerItem.Key.z <= trans.position.z + 5)
+                    {
+                        // Time.timeScale = .2f;
+                        towerItem.Value.isActive = false;
+                        //towerItem.Value.gameObject.SetActive(false);
+                    }
+                }*/
     }
 }

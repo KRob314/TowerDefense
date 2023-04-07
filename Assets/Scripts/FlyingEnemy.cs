@@ -7,7 +7,7 @@ public class FlyingEnemy : Enemy
     //[Tooltip("Units moved per second.")]
     //public float movespeed;
 
-    private Vector3 targetPosition;
+    protected Vector3 targetPosition;
 
     protected override void Start()
     {

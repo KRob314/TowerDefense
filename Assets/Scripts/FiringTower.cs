@@ -88,6 +88,9 @@ public class FiringTower : TargetingTower
     //Unity events:
     protected virtual void Update()
     {
+        if (!isActive)
+            return;
+
         if (targetedEnemy != null) //If there is a targeted enemy
         {
             //If the enemy is dead or is not in range anymore, get a new target:

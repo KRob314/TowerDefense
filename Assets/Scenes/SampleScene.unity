@@ -3117,7 +3117,7 @@ MonoBehaviour:
   movementSmoothing: 0.75
   scrollSensitivity: 1.6
   DifficultyLevel: 2
-  gold: 50
+  gold: 500
   stageLayerMask:
     serializedVersion: 2
     m_Bits: 1
@@ -3148,8 +3148,9 @@ MonoBehaviour:
   groundEnemyDoublePrefab: {fileID: 2481239056797579474, guid: 1adf61b6a92a7bc4ba2ec1f8b05888e0, type: 3}
   flyingEnemyPrefab: {fileID: 991746321665488439, guid: 8c39df7507436464b861b64729704611, type: 3}
   flyingArmoredEnemyPrefab: {fileID: 390037080352225283, guid: 26d6887f194734447a7aa87316dd6723, type: 3}
+  flyingEnemyFreezePrefab: {fileID: 2973306036448134491, guid: 61d58b3f573c94f45a2b27f828188e3f, type: 3}
   enemySpawnRate: 0.35
-  flyingLevelInterval: 4
+  flyingLevelInterval: 1
   mixedLevelInterval: 6
   enemiesPerLevel: 15
   goldRewardPerLevel: 12

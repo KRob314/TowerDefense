@@ -148,6 +148,7 @@ public class Player : MonoBehaviour
     [Tooltip("Reference to the Play Button GameObject to deactivate it in play mode.")]
     public GameObject playButton;
 
+    [Header("Enemies")]
     [Tooltip("Reference to the Enemy Holder Transform.")]
     public Transform enemyHolder;
 
@@ -160,10 +161,12 @@ public class Player : MonoBehaviour
     [Tooltip("Reference to the flying enemy prefab.")]
     public Enemy flyingEnemyPrefab;
     public Enemy flyingArmoredEnemyPrefab;
+    public Enemy flyingEnemyFreezePrefab;
 
     [Tooltip("Time in seconds between each enemy spawning.")]
     public float enemySpawnRate = .35f;
 
+    [Header("Game")]
     [Tooltip(
         "Determines how often flying enemy levels occur.  For example if this is set to 4, every 4th level is a flying level."
     )]
@@ -427,8 +430,6 @@ public class Player : MonoBehaviour
             speed.text = $"Speed: {100 - (towerTemp.fireInterval * 100)}";
             damage.text = $"Damage: {towerTemp.damage}";
             range.text = $"Range: {towerTemp.range}";
-
-            Debug.Log(tower.name);
 
             String targetsStr = "Targets: ";
             if (towerTemp.canAttackGround)
@@ -881,11 +882,22 @@ public class Player : MonoBehaviour
             }
             else
             {
-                enemy = Instantiate(
-                    flyingArmoredEnemyPrefab,
-                    spawnPoint.position + (Vector3.up * 18),
-                    Quaternion.LookRotation(Vector3.back)
-                );
+                if (randomNumForDoubleEmeny > 20 || level < 5)
+                {
+                    enemy = Instantiate(
+                        flyingArmoredEnemyPrefab,
+                        spawnPoint.position + (Vector3.up * 18),
+                        Quaternion.LookRotation(Vector3.back)
+                    );
+                }
+                else
+                {
+                    enemy = Instantiate(
+                        flyingEnemyFreezePrefab,
+                        spawnPoint.position + (Vector3.up * 18),
+                        Quaternion.LookRotation(Vector3.back)
+                    );
+                }
             }
 
             enemies.Add(enemy);
@@ -953,6 +965,7 @@ public class Player : MonoBehaviour
             enemies.Add(enemy);
         }
 
+        enemy.SetTowers(towers);
         //Parent enemy to the enemy holder:
         enemy.trans.SetParent(enemyHolder);
 
@@ -1045,6 +1058,15 @@ public class Player : MonoBehaviour
 
         SetAvailableBuildButtons();
         ClearSelfDestructingTowers();
+        SetTowersActive();
+    }
+
+    void SetTowersActive()
+    {
+        foreach (var tower in towers.Values)
+        {
+            tower.SetActive();
+        }
     }
 
     void ClearSelfDestructingTowers()

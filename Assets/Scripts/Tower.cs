@@ -14,9 +14,13 @@ public class Tower : MonoBehaviour
     public bool canUpgradeRange = true;
     public Material defaultMaterial;
     public Material highlightMaterial;
+    public Material disabledMaterial;
 
     [HideInInspector]
     public bool towerIsHighlighted = false;
+
+    [HideInInspector]
+    public bool isActive = true;
 
     //= Resources.Load("Enemy", typeof(Material)) as Material;
 
@@ -33,5 +37,20 @@ public class Tower : MonoBehaviour
     {
         this.GetComponentInChildren<MeshRenderer>().material = defaultMaterial;
         towerIsHighlighted = false;
+    }
+
+    public void SetInactive()
+    {
+        this.GetComponentInChildren<MeshRenderer>().material = disabledMaterial;
+        isActive = false;
+    }
+
+    public void SetActive()
+    {
+        if (!isActive)
+        {
+            this.GetComponentInChildren<MeshRenderer>().material = defaultMaterial;
+            isActive = true;
+        }
     }
 }

@@ -25,6 +25,8 @@ public class Enemy : MonoBehaviour
     public float movespeed = 22;
     private float movespeedBase = 22;
 
+    protected Dictionary<Vector3, Tower> _towers = null;
+
     //Methods:
     public void SlowDown(float slowDownRate)
     {
@@ -107,6 +109,11 @@ public class Enemy : MonoBehaviour
     {
         Player.remainingLives -= 1;
         Destroy(gameObject);
+    }
+
+    public void SetTowers(Dictionary<Vector3, Tower> towers)
+    {
+        _towers = towers;
     }
 
     //Unity events:
