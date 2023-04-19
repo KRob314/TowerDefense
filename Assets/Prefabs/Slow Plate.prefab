@@ -227,6 +227,11 @@ MonoBehaviour:
   canUpgradeDamage: 0
   canUpgradeSpeed: 0
   canUpgradeRange: 0
+  defaultMaterial: {fileID: 2100000, guid: 4b1dd81343560934381d5435c574eab3, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 4b1dd81343560934381d5435c574eab3, type: 2}
+  disabledMaterial: {fileID: 2100000, guid: 4b1dd81343560934381d5435c574eab3, type: 2}
+  towerIsHighlighted: 0
+  isActive: 1
   refundFactor: 0.5
   targeter: {fileID: 6952783867247231772}
   range: 5

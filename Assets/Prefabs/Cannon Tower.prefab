@@ -99,6 +99,14 @@ MonoBehaviour:
   upgradesBought: 0
   upgradeCost: 5
   upgradeCostForRateOfFire: 10
+  canUpgradeDamage: 1
+  canUpgradeSpeed: 1
+  canUpgradeRange: 1
+  defaultMaterial: {fileID: 2100000, guid: 1ce254c3fe009b141a5d8e830e375b30, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 9eea0ba81f666f741a290afc1376b544, type: 2}
+  disabledMaterial: {fileID: 2100000, guid: 5ea98fe2876ca764e81355031e2c6a36, type: 2}
+  towerIsHighlighted: 0
+  isActive: 1
   refundFactor: 0.5
   targeter: {fileID: 4861841440197002177}
   range: 30

@@ -221,8 +221,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   goldCost: 12
+  upgradesBought: 0
   upgradeCost: 6
+  upgradeCostForRateOfFire: 10
+  canUpgradeDamage: 1
+  canUpgradeSpeed: 1
+  canUpgradeRange: 1
+  defaultMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}
+  disabledMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}
+  towerIsHighlighted: 0
+  isActive: 1
   refundFactor: 0.5
   targeter: {fileID: 2555561957193104240}
   range: 5
   damagePerSecond: 10
+  slowDownRate: 2
+  damagePerSecondNew: 10

@@ -828,10 +828,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f524c823203bc04681d004258abb972, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  goldCost: 30
+  goldCost: 40
   upgradesBought: 0
   upgradeCost: 10
   upgradeCostForRateOfFire: 20
+  canUpgradeDamage: 1
+  canUpgradeSpeed: 1
+  canUpgradeRange: 1
+  defaultMaterial: {fileID: 0}
+  highlightMaterial: {fileID: 0}
+  disabledMaterial: {fileID: 0}
+  towerIsHighlighted: 0
+  isActive: 1
   refundFactor: 0.5
   targeter: {fileID: 1191251773486738531}
   range: 30

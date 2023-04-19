@@ -27,6 +27,7 @@ public class Player : MonoBehaviour
 
     private List<Enemy> enemies = new List<Enemy>();
 
+    #region References
     [Header("References")]
     public Transform trans;
     public Transform spawnPoint;
@@ -34,6 +35,41 @@ public class Player : MonoBehaviour
 
     [Tooltip("Reference to the sell button lock panel GameObject.")]
     public GameObject sellButtonLockPanel;
+
+    [Tooltip("Layer mask for highlighter raycasting.  Should include the layer of the stage.")]
+    public LayerMask stageLayerMask;
+
+    [Tooltip("Reference to the Transform of the Highlighter GameObject.")]
+    public Transform highlighter;
+
+    [Tooltip("Reference to the Tower Selling Panel.")]
+    public RectTransform towerSellingPanel;
+    public RectTransform towerActionsPanel;
+    public RectTransform settingsPanel;
+    public RectTransform gamePlayPanel;
+    public RectTransform enemyInfoPanel;
+
+    [Tooltip("Reference to the Tower Description Panel.")]
+    public RectTransform towerDescriptionPanel;
+
+    [Tooltip("Reference to the Tower Upgrade Panel.")]
+    public RectTransform towerUpgradePanel;
+
+    [Tooltip("Reference to the Text component of the Refund Text in the Tower Selling Panel.")]
+    public Text sellRefundText;
+    public Text upgradeDamageCostText;
+    public Text upgradeRateOfFireCostText;
+    public Text upgradeRangeCostText;
+    public Text towerStatsText;
+
+    [Tooltip(
+        "Reference to the Text component of the current gold text in the bottom-left corner of the UI."
+    )]
+    public Text currentGoldText;
+    public Text currentLevelText;
+    public Text remainingLivesText;
+    public Text enemiesText;
+    #endregion
 
     [Header("X Bounds")]
     public float minimumX = -70;
@@ -62,10 +98,13 @@ public class Player : MonoBehaviour
 
     private Vector3 targetPosition;
 
+    #region Scrolling
     [Header("Scrolling")]
     [Tooltip("Amount of Y distance the camera moves per mouse scroll increment.")]
     public float scrollSensitivity = 1.6f;
+    #endregion
 
+    #region Build Mode
     [Header("Build Mode")]
     public Difficulty DifficultyLevel = Difficulty.Easy;
 
@@ -74,41 +113,9 @@ public class Player : MonoBehaviour
     )]
     public int gold = 50;
 
-    [Tooltip("Layer mask for highlighter raycasting.  Should include the layer of the stage.")]
-    public LayerMask stageLayerMask;
-
-    [Tooltip("Reference to the Transform of the Highlighter GameObject.")]
-    public Transform highlighter;
-
-    [Tooltip("Reference to the Tower Selling Panel.")]
-    public RectTransform towerSellingPanel;
-    public RectTransform towerActionsPanel;
-    public RectTransform settingsPanel;
-    public RectTransform gamePlayPanel;
-
-    [Tooltip("Reference to the Tower Description Panel.")]
-    public RectTransform towerDescriptionPanel;
-
-    [Tooltip("Reference to the Tower Upgrade Panel.")]
-    public RectTransform towerUpgradePanel;
-
-    [Tooltip("Reference to the Text component of the Refund Text in the Tower Selling Panel.")]
-    public Text sellRefundText;
-    public Text upgradeDamageCostText;
-    public Text upgradeRateOfFireCostText;
-    public Text upgradeRangeCostText;
-    public Text towerStatsText;
-
-    [Tooltip(
-        "Reference to the Text component of the current gold text in the bottom-left corner of the UI."
-    )]
-    public Text currentGoldText;
-    public Text currentLevelText;
-    public Text remainingLivesText;
-    public Text enemiesText;
-
     [Tooltip("The color to apply to the selected build button.")]
     public Color selectedBuildButtonColor = new Color(.2f, .8f, .2f);
+    #endregion
 
     //Mouse position at the last frame.
     private Vector3 lastMousePosition;
@@ -134,7 +141,7 @@ public class Player : MonoBehaviour
     private int livesAtStartOfLevel = 0;
     private int livesAtEndOfLevel = 0;
 
-    //Play Mode:
+    #region Play Mode
     [Header("Play Mode")]
     [Tooltip("Reference to the Build Button Panel to deactivate it when play mode starts.")]
     public GameObject buildButtonPanel;
@@ -147,7 +154,9 @@ public class Player : MonoBehaviour
 
     [Tooltip("Reference to the Play Button GameObject to deactivate it in play mode.")]
     public GameObject playButton;
+    #endregion
 
+    #region Enemies
     [Header("Enemies")]
     [Tooltip("Reference to the Enemy Holder Transform.")]
     public Transform enemyHolder;
@@ -165,7 +174,9 @@ public class Player : MonoBehaviour
 
     [Tooltip("Time in seconds between each enemy spawning.")]
     public float enemySpawnRate = .35f;
+    #endregion
 
+    #region Game
     [Header("Game")]
     [Tooltip(
         "Determines how often flying enemy levels occur.  For example if this is set to 4, every 4th level is a flying level."
@@ -178,6 +189,12 @@ public class Player : MonoBehaviour
 
     [Tooltip("Gold given to the player at the end of each level.")]
     public int goldRewardPerLevel = 12;
+
+    [HideInInspector]
+    [Tooltip("How likely an enemy with spawn with armor.")]
+    private int armoredEnemyFactor = 0;
+    #endregion
+
 
     //The current level.
     public static int level = 1;
@@ -453,7 +470,8 @@ public class Player : MonoBehaviour
                     targets.text = targetsStr;
                     break;
                 case "Arrow Tower Double Barrel":
-                    description.text = "Shoots two arrows. Can upgrade damage, speed, and range.";
+                    description.text =
+                        "Simultaneously shoots two arrows. Can upgrade damage, speed, and range.";
                     targets.text = targetsStr;
                     break;
                 case "Cannon Tower":
@@ -471,6 +489,12 @@ public class Player : MonoBehaviour
                 case "Anti Air Tower":
                     description.text =
                         "Automatic weapon of small calibre that is capable of sustained rapid fire. Weak until upgraded. Can upgrade damage, speed, and range.";
+                    targets.text = targetsStr;
+                    break;
+
+                case "Laser Tower":
+                    description.text =
+                        "Direct energy weapon with great range. Can upgrade damage, speed, and range.";
                     targets.text = targetsStr;
                     break;
             }
@@ -501,10 +525,13 @@ public class Player : MonoBehaviour
         switch (tower.name)
         {
             case "Hot Plate":
+                description.text =
+                    "A passable area that burns nearby enemies. Can upgrade slow down rate.";
+                targets.text = "Targets: Ground";
                 break;
             case "Slow Plate":
                 description.text =
-                    "A passable pad that slows down nearby enemies. Can upgrade slow down rate.";
+                    "A passable area that slows down nearby enemies. Can upgrade slow down rate.";
                 targets.text = "Targets: Ground, Aerial";
                 break;
             case "Bomb Plate":
@@ -872,7 +899,7 @@ public class Player : MonoBehaviour
         //If this is a flying level
         if (level % flyingLevelInterval == 0)
         {
-            if (randomNum > numberToMakeEnemyArmored)
+            if (randomNum - armoredEnemyFactor > numberToMakeEnemyArmored)
             {
                 enemy = Instantiate(
                     flyingEnemyPrefab,
@@ -882,7 +909,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                if (randomNumForDoubleEmeny > 20 || level < 5)
+                if (randomNumForDoubleEmeny > 20 || level < 16)
                 {
                     enemy = Instantiate(
                         flyingArmoredEnemyPrefab,
@@ -923,24 +950,13 @@ public class Player : MonoBehaviour
         }
         else //If it's a ground level
         {
-            if (randomNum > numberToMakeEnemyArmored)
+            if (randomNum - armoredEnemyFactor > numberToMakeEnemyArmored)
             {
-                //if (randomNumForDoubleEmeny > numberToMakeDoubledEnemy)
-                //{
                 enemy = Instantiate(
                     groundEnemyPrefab,
                     spawnPoint.position,
                     Quaternion.LookRotation(Vector3.back)
                 );
-                //}
-                //else
-                //{
-                // enemy = Instantiate(
-                //   groundEnemyDoublePrefab,
-                //  spawnPoint.position,
-                //  Quaternion.LookRotation(Vector3.back)
-                //);
-                //}
             }
             else
             {
@@ -1025,6 +1041,11 @@ public class Player : MonoBehaviour
         //Deactivate highlighter:
         highlighter.gameObject.SetActive(false);
         ClearHighlightedTowers();
+
+        if (level == 12)
+        {
+            enemyInfoPanel.gameObject.SetActive(false);
+        }
     }
 
     void GoToBuildMode()
@@ -1050,10 +1071,15 @@ public class Player : MonoBehaviour
         level += 1;
         gold += goldRewardPerLevel;
 
-        if (level / 5 == 1)
+        if (level % 3 == 0)
         {
             enemiesPerLevel += 5;
             gold += 5;
+        }
+
+        if (level == 12)
+        {
+            enemyInfoPanel.gameObject.SetActive(true);
         }
 
         SetAvailableBuildButtons();
@@ -1172,6 +1198,7 @@ public class Player : MonoBehaviour
         enemiesPerLevel += DifficultyFactor;
         goldRewardPerLevel -= DifficultyFactor;
         remainingLives -= DifficultyFactor;
+        armoredEnemyFactor = DifficultyFactor + (int)(DifficultyFactor * 0.75);
     }
 
     public void OnExchangeLivesForGold()
