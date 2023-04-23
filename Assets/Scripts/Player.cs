@@ -8,6 +8,7 @@ using System.Linq;
 
 public class Player : MonoBehaviour
 {
+    #region  Properties
     private enum Mode
     {
         Build,
@@ -58,6 +59,7 @@ public class Player : MonoBehaviour
     [Tooltip("Reference to the Text component of the Refund Text in the Tower Selling Panel.")]
     public Text sellRefundText;
     public Text upgradeDamageCostText;
+    public Text upgradeDamageQuadCostText;
     public Text upgradeRateOfFireCostText;
     public Text upgradeRangeCostText;
     public Text towerStatsText;
@@ -208,10 +210,11 @@ public class Player : MonoBehaviour
     private Color towerDefaultColor;
 
     private GameObject upgradeDamageButton = null;
+    private GameObject upgradeDamageQuadButton = null;
     private GameObject upgradeSpeedButton = null;
     private GameObject upgradeRangeButton = null;
 
-    //private List<Transform> buildButtons = new List<Transform>();
+    private List<GameObject> buildButtons = new List<GameObject>();
 
     private int numberToMakeEnemyArmored
     {
@@ -250,7 +253,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    //Methods:
+    #endregion
+
+    #region Movement
     void ArrowKeyMovement()
     {
         //If up arrow is held,
@@ -369,7 +374,9 @@ public class Player : MonoBehaviour
         //Make sure we keep track of the mouse position this frame:
         lastMousePosition = Input.mousePosition;
     }
+    #endregion
 
+    #region Tower methods
     void OnStageClicked()
     {
         //Debug.Log("OnStageClicked()");
@@ -416,14 +423,6 @@ public class Player : MonoBehaviour
                 //towerSellingPanel.gameObject.SetActive(true);
                 //towerUpgradePanel.gameObject.SetActive(true);
             }
-        }
-    }
-
-    private void ClearHighlightedTowers()
-    {
-        foreach (var tower in towers.Values.Where(t => t.towerIsHighlighted))
-        {
-            tower.UnHighlightTower();
         }
     }
 
@@ -497,6 +496,12 @@ public class Player : MonoBehaviour
                         "Direct energy weapon with great range. Can upgrade damage, speed, and range.";
                     targets.text = targetsStr;
                     break;
+
+                case "Mortar Tower":
+                    description.text =
+                        "Launches explosive shells in high-arcing ballistic trajectories dealing splash damage. Can upgrade damage, speed, and range.";
+                    targets.text = targetsStr;
+                    break;
             }
         }
         else if (tower is TargetingTower)
@@ -539,6 +544,11 @@ public class Player : MonoBehaviour
                     @"A passable bomb that explodes 1 second after the first enemy has entered its range. Can upgrade damage.";
                 targets.text = "Targets: Ground, Aerial";
                 break;
+            case "AA Bomb":
+                description.text =
+                    @"A passable bomb that will detonate 1 second after the first enemy has entered its range. Can upgrade damage.";
+                targets.text = "Targets: Aerial";
+                break;
         }
     }
 
@@ -560,6 +570,7 @@ public class Player : MonoBehaviour
             upgradeDamageButton = GameObject.Find("Upgrade Damage Button");
             upgradeSpeedButton = GameObject.Find("Upgrade RateOfFire Button");
             upgradeRangeButton = GameObject.Find("Upgrade Range Button");
+            upgradeDamageQuadButton = GameObject.Find("Upgrade Damage Button 2");
         }
 
         sellRefundText.text =
@@ -570,6 +581,9 @@ public class Player : MonoBehaviour
             + " gold";
 
         upgradeDamageCostText.text = "+ Damage: " + selectedTower.upgradeCost.ToString() + " gold";
+        upgradeDamageQuadCostText.text =
+            "+ Damage (x4): " + (selectedTower.upgradeCost * 4).ToString() + " gold";
+
         upgradeRateOfFireCostText.text =
             $"+ Speed: {selectedTower.upgradeCostForRateOfFire.ToString()} gold";
         upgradeRangeCostText.text = $"+ Range: {selectedTower.upgradeCost.ToString()} gold";
@@ -610,9 +624,16 @@ public class Player : MonoBehaviour
             upgradeDamageButton.SetActive(true);
 
         if (!selectedTower.canUpgradeSpeed)
+        {
             upgradeSpeedButton.SetActive(false);
+            if (selectedTower.name != "Barricade")
+                upgradeDamageQuadButton.SetActive(true);
+        }
         else
+        {
             upgradeSpeedButton.SetActive(true);
+            upgradeDamageQuadButton.SetActive(false);
+        }
 
         if (!selectedTower.canUpgradeRange)
             upgradeRangeButton.SetActive(false);
@@ -630,6 +651,7 @@ public class Player : MonoBehaviour
 
         //Update the path through the maze:
         UpdateEnemyPath();
+        SetBuildButtonAffordable();
     }
 
     void SellTower(Tower tower)
@@ -648,6 +670,7 @@ public class Player : MonoBehaviour
 
         //Refresh pathfinding:
         UpdateEnemyPath();
+        SetBuildButtonAffordable();
     }
 
     public void OnSellTowerButtonClicked()
@@ -658,14 +681,14 @@ public class Player : MonoBehaviour
             SellTower(selectedTower);
     }
 
-    public void OnUpgradeTowerDamageButtonClicked()
+    public void OnUpgradeTowerDamageButtonClicked(int multiplier = 1)
     {
         if (selectedTower != null)
         {
-            if (gold - Mathf.CeilToInt(selectedTower.upgradeCost) < 0)
+            if (gold - Mathf.CeilToInt(selectedTower.upgradeCost * multiplier) < 0)
                 return;
 
-            selectedTower.upgradesBought += selectedTower.upgradeCost;
+            selectedTower.upgradesBought += selectedTower.upgradeCost * multiplier;
             if (selectedTower is FiringTower)
             {
                 FiringTower towerTemp = (FiringTower)selectedTower;
@@ -673,21 +696,23 @@ public class Player : MonoBehaviour
                 if (towerTemp.damage >= 100)
                     return;
 
-                towerTemp.damage += 1;
-                gold -= Mathf.CeilToInt(towerTemp.upgradeCost);
+                towerTemp.damage += 1 * multiplier;
+                gold -= Mathf.CeilToInt(towerTemp.upgradeCost * multiplier);
             }
             else if (selectedTower is HotPlate)
             {
                 HotPlate towerTemp = (HotPlate)selectedTower;
-                towerTemp.damagePerSecond += 1; // Mathf.CeilToInt(towerTemp.damagePerSecond / 4);
-                gold -= Mathf.CeilToInt(towerTemp.upgradeCost);
+                towerTemp.damagePerSecond += 1 * multiplier; // Mathf.CeilToInt(towerTemp.damagePerSecond / 4);
+                gold -= Mathf.CeilToInt(towerTemp.upgradeCost * multiplier);
             }
             else if (selectedTower is Bomb)
             {
                 Bomb towerTemp = (Bomb)selectedTower;
-                towerTemp.damagePerSecond += 1; // Mathf.CeilToInt(towerTemp.damagePerSecond / 4);
-                gold -= Mathf.CeilToInt(towerTemp.upgradeCost);
+                towerTemp.damagePerSecond += 1 * multiplier; // Mathf.CeilToInt(towerTemp.damagePerSecond / 4);
+                gold -= Mathf.CeilToInt(towerTemp.upgradeCost * multiplier);
             }
+
+            SetBuildButtonAffordable();
         }
 
         UpdateTowerActionPanel();
@@ -738,32 +763,31 @@ public class Player : MonoBehaviour
                 towerTemp.range += 2;
                 towerTemp.targeter.SetRange(towerTemp.range);
                 gold -= Mathf.CeilToInt(towerTemp.upgradeCost);
+                SetBuildButtonAffordable();
             }
         }
 
         UpdateTowerActionPanel();
     }
 
-    void PositionSellPanel()
+    public void OnBuildButtonClicked(Tower associatedTower)
     {
-        //If there is a selected tower:
-        if (selectedTower != null)
-        {
-            //Convert tower world position, moved forward by 8 units, to screen space:
-            var screenPosition = Camera.main.WorldToScreenPoint(
-                selectedTower.transform.position + Vector3.forward * 30
-            );
-
-            var screenPosition2 = Camera.main.WorldToScreenPoint(
-                selectedTower.transform.position + Vector3.right * 40 + Vector3.forward * 8
-            );
-
-            //Apply the position to the tower selling panel:
-            //towerSellingPanel.position = screenPosition;
-            //towerUpgradePanel.position = screenPosition2;
-            towerActionsPanel.position = screenPosition;
-        }
+        //Set the prefab to build:
+        towerPrefabToBuild = associatedTower;
+        //Clear selected tower (if any):
+        DeselectTower();
+        DeselectButtons();
     }
+
+    public void SetSelectedBuildButton(Image clickedButtonImage)
+    {
+        //Keep a reference to the Button that was clicked:
+        selectedBuildButtonImage = clickedButtonImage;
+
+        //Set the color of the clicked button:
+        clickedButtonImage.color = selectedBuildButtonColor;
+    }
+    #endregion
 
     void UpdateCurrentGold()
     {
@@ -799,6 +823,59 @@ public class Player : MonoBehaviour
         }
     }
 
+    #region data, settings
+    private void SetDifficultySettings()
+    {
+        gold -= DifficultyFactor;
+        enemiesPerLevel += DifficultyFactor;
+        goldRewardPerLevel -= DifficultyFactor;
+        remainingLives -= DifficultyFactor;
+        armoredEnemyFactor = DifficultyFactor + (int)(DifficultyFactor * 0.75);
+    }
+
+    private void SetBuildButtons()
+    {
+        buildButtons.Add(GameObject.Find("Build Button"));
+        buildButtons.Add(GameObject.Find("Build Button (1)"));
+        buildButtons.Add(GameObject.Find("Build Button (2)"));
+        buildButtons.Add(GameObject.Find("Build Button (3)"));
+        buildButtons.Add(GameObject.Find("Build Button (4)"));
+        buildButtons.Add(GameObject.Find("Build Button (5)"));
+        buildButtons.Add(GameObject.Find("Build Button (6)"));
+        buildButtons.Add(GameObject.Find("Build Button (7)"));
+        buildButtons.Add(GameObject.Find("Build Button (8)"));
+        buildButtons.Add(GameObject.Find("Build Button (9)"));
+        buildButtons.Add(GameObject.Find("Build Button (10)"));
+        buildButtons.Add(GameObject.Find("Build Button (11)"));
+        buildButtons.Add(GameObject.Find("Build Button (12)"));
+    }
+
+    public void OnSetDifficulty(int difficulty)
+    {
+        DifficultyFactor = difficulty;
+        SetDifficultySettings();
+        settingsPanel.gameObject.SetActive(false);
+        gamePlayPanel.gameObject.SetActive(true);
+        buildButtonPanel.SetActive(true);
+        SetAvailableBuildButtons();
+    }
+
+    #endregion
+
+    void DeselectButtons()
+    {
+        if (!buildButtons.Any())
+            SetBuildButtons();
+
+        for (int i = 0; i < buildButtons.Count; i++)
+        {
+            Image selectedBuildButtonImageTemp = buildButtons[i].GetComponent<Image>();
+
+            selectedBuildButtonImageTemp.color = Color.white;
+        }
+    }
+
+    #region Game Methods
     void UpdateEnemyPath()
     {
         Invoke("PerformPathfinding", .1f);
@@ -825,46 +902,6 @@ public class Player : MonoBehaviour
 
             DeselectBuildButton();
         }
-    }
-
-    void DeselectButtons()
-    {
-        var buildButtons = new List<GameObject>();
-        buildButtons.Add(GameObject.Find("Build Button"));
-        buildButtons.Add(GameObject.Find("Build Button (1)"));
-        buildButtons.Add(GameObject.Find("Build Button (2)"));
-        buildButtons.Add(GameObject.Find("Build Button (3)"));
-        buildButtons.Add(GameObject.Find("Build Button (4)"));
-        buildButtons.Add(GameObject.Find("Build Button (5)"));
-        buildButtons.Add(GameObject.Find("Build Button (6)"));
-        buildButtons.Add(GameObject.Find("Build Button (7)"));
-        buildButtons.Add(GameObject.Find("Build Button (8)"));
-        buildButtons.Add(GameObject.Find("Build Button (9)"));
-
-        for (int i = 0; i < buildButtons.Count; i++)
-        {
-            Image selectedBuildButtonImageTemp = buildButtons[i].GetComponent<Image>();
-
-            selectedBuildButtonImageTemp.color = Color.white;
-        }
-    }
-
-    public void OnBuildButtonClicked(Tower associatedTower)
-    {
-        //Set the prefab to build:
-        towerPrefabToBuild = associatedTower;
-        //Clear selected tower (if any):
-        DeselectTower();
-        DeselectButtons();
-    }
-
-    public void SetSelectedBuildButton(Image clickedButtonImage)
-    {
-        //Keep a reference to the Button that was clicked:
-        selectedBuildButtonImage = clickedButtonImage;
-
-        //Set the color of the clicked button:
-        clickedButtonImage.color = selectedBuildButtonColor;
     }
 
     void PerformPathfinding()
@@ -1024,12 +1061,26 @@ public class Player : MonoBehaviour
         {
             enemiesText.text = $"Enemies: {enemyHolder.childCount}/{enemiesPerLevel}";
         }
+
+        if (level % flyingLevelInterval == 0)
+        {
+            currentLevelText.color = Color.blue;
+        }
+        else if (level % mixedLevelInterval == 0)
+        {
+            currentLevelText.color = Color.cyan;
+        }
+        else
+        {
+            currentLevelText.color = Color.green;
+        }
     }
 
     void GoToPlayMode()
     {
         DeselectTower();
         DeselectBuildButton();
+        SetTowersActive();
 
         livesAtStartOfLevel = remainingLives;
         mode = Mode.Play;
@@ -1084,78 +1135,7 @@ public class Player : MonoBehaviour
 
         SetAvailableBuildButtons();
         ClearSelfDestructingTowers();
-        SetTowersActive();
-    }
-
-    void SetTowersActive()
-    {
-        foreach (var tower in towers.Values)
-        {
-            tower.SetActive();
-        }
-    }
-
-    void ClearSelfDestructingTowers()
-    {
-        foreach (var i in towers.Where(d => d.Value.ToString().Contains("Bomb Plate")).ToList())
-        {
-            towers.Remove(i.Key);
-            Destroy(i.Value.gameObject);
-        }
-    }
-
-    void SetAvailableBuildButtons()
-    {
-        if (!buildButtonPanel.activeInHierarchy)
-        {
-            return;
-        }
-
-        //Debug.Log("SetAvailableBuildButtons()");
-        var doubleArrowBuildBtn = GameObject.Find("Build Button (5)").GetComponent<Button>();
-        var cannonBuildBtn = GameObject.Find("Build Button (1)").GetComponent<Button>();
-        var slowPlateBuildBtn = GameObject.Find("Build Button (6)").GetComponent<Button>();
-        var machineGuneBuildBtn = GameObject.Find("Build Button (7)").GetComponent<Button>();
-        var laserBuildBtn = GameObject.Find("Build Button (4)").GetComponent<Button>();
-        var bombBuildBtn = GameObject.Find("Build Button (8)").GetComponent<Button>();
-        var aaBuildBtn = GameObject.Find("Build Button (9)").GetComponent<Button>();
-
-        if (level < 3)
-        {
-            doubleArrowBuildBtn.interactable = false;
-            bombBuildBtn.interactable = false;
-        }
-        else
-        {
-            doubleArrowBuildBtn.interactable = true;
-            bombBuildBtn.interactable = true;
-        }
-
-        if (level < 5)
-        {
-            cannonBuildBtn.interactable = false;
-            slowPlateBuildBtn.interactable = false;
-            aaBuildBtn.interactable = false;
-        }
-        else
-        {
-            cannonBuildBtn.interactable = true;
-            slowPlateBuildBtn.interactable = true;
-            aaBuildBtn.interactable = true;
-        }
-
-        if (level < 10)
-        {
-            machineGuneBuildBtn.interactable = false;
-            laserBuildBtn.interactable = false;
-        }
-        else
-        {
-            machineGuneBuildBtn.interactable = true;
-            laserBuildBtn.interactable = true;
-        }
-
-        //Debug.Log(machineGuneBuildBtn.name);
+        SetTowersInActive();
     }
 
     public void SpeedUp()
@@ -1192,42 +1172,6 @@ public class Player : MonoBehaviour
         InvokeRepeating("SpawnEnemy", .5f, enemySpawnRate);
     }
 
-    private void SetDifficultySettings()
-    {
-        gold -= DifficultyFactor;
-        enemiesPerLevel += DifficultyFactor;
-        goldRewardPerLevel -= DifficultyFactor;
-        remainingLives -= DifficultyFactor;
-        armoredEnemyFactor = DifficultyFactor + (int)(DifficultyFactor * 0.75);
-    }
-
-    public void OnExchangeLivesForGold()
-    {
-        if (remainingLives > 5)
-        {
-            gold += 5;
-            remainingLives -= 5;
-        }
-    }
-
-    //Unity events:
-    void Start()
-    {
-        buildButtonPanel.SetActive(false);
-
-        targetPosition = trans.position;
-        GroundEnemy.path = new NavMeshPath();
-        UpdateEnemyPath();
-    }
-
-    void OnGUI()
-    {
-        // GUI.Label(new Rect(300, 100, 100, 20), "Hello World!");
-
-        //Debug.Log("enemies: " + enemies.Count);
-        UpdateEmemyHealthLabel();
-    }
-
     void UpdateEmemyHealthLabel()
     {
         List<int> enemyIndexesToRemove = new List<int>();
@@ -1256,6 +1200,204 @@ public class Player : MonoBehaviour
             enemies.RemoveAt(enemyIndexesToRemove[i]);
         }
     }
+    #endregion
+
+
+    #region Show/Hide, Positioning, clean up
+    void SetTowersActive()
+    {
+        foreach (var tower in towers.Values)
+        {
+            tower.SetActive();
+        }
+    }
+
+    void SetTowersInActive()
+    {
+        foreach (var tower in towers.Values)
+        {
+            tower.SetInactive();
+        }
+    }
+
+    void ClearSelfDestructingTowers()
+    {
+        foreach (
+            var i in towers
+                .Where(
+                    d =>
+                        d.Value.ToString().Contains("Bomb Plate")
+                        || d.Value.ToString().Contains("AA Bomb")
+                )
+                .ToList()
+        )
+        {
+            towers.Remove(i.Key);
+            Destroy(i.Value.gameObject);
+        }
+    }
+
+    void SetAvailableBuildButtons()
+    {
+        if (!buildButtonPanel.activeInHierarchy)
+        {
+            return;
+        }
+
+        //Debug.Log("SetAvailableBuildButtons()");
+        var arrowTowerBuildBtn = GameObject.Find("Build Button").GetComponent<Button>();
+        var barricadeBuildBtn = GameObject.Find("Build Button (3)").GetComponent<Button>();
+        var doubleArrowBuildBtn = GameObject.Find("Build Button (5)").GetComponent<Button>();
+        var cannonBuildBtn = GameObject.Find("Build Button (1)").GetComponent<Button>();
+        var slowPlateBuildBtn = GameObject.Find("Build Button (6)").GetComponent<Button>();
+        var machineGuneBuildBtn = GameObject.Find("Build Button (7)").GetComponent<Button>();
+        var laserBuildBtn = GameObject.Find("Build Button (4)").GetComponent<Button>();
+        var bombBuildBtn = GameObject.Find("Build Button (8)").GetComponent<Button>();
+        var aaBuildBtn = GameObject.Find("Build Button (9)").GetComponent<Button>();
+        var aaBombBuildBtn = GameObject.Find("Build Button (10)").GetComponent<Button>();
+        var railGunBuildBtn = GameObject.Find("Build Button (11)").GetComponent<Button>();
+        var mortarBuildBtn = GameObject.Find("Build Button (12)").GetComponent<Button>();
+
+        arrowTowerBuildBtn.interactable = true;
+        barricadeBuildBtn.interactable = true;
+
+        if (level < 3)
+        {
+            doubleArrowBuildBtn.interactable = false;
+            bombBuildBtn.interactable = false;
+        }
+        else
+        {
+            doubleArrowBuildBtn.interactable = true;
+            bombBuildBtn.interactable = true;
+        }
+
+        if (level < 5)
+        {
+            cannonBuildBtn.interactable = false;
+            slowPlateBuildBtn.interactable = false;
+            aaBuildBtn.interactable = false;
+            aaBombBuildBtn.interactable = false;
+        }
+        else
+        {
+            cannonBuildBtn.interactable = true;
+            slowPlateBuildBtn.interactable = true;
+            aaBuildBtn.interactable = true;
+            aaBombBuildBtn.interactable = true;
+        }
+
+        if (level < 10)
+        {
+            machineGuneBuildBtn.interactable = false;
+            laserBuildBtn.interactable = false;
+        }
+        else
+        {
+            machineGuneBuildBtn.interactable = true;
+            laserBuildBtn.interactable = true;
+        }
+
+        if (level < 15)
+        {
+            mortarBuildBtn.interactable = false;
+            railGunBuildBtn.interactable = false;
+        }
+        else
+        {
+            mortarBuildBtn.interactable = true;
+            railGunBuildBtn.interactable = true;
+        }
+
+        SetBuildButtonAffordable();
+    }
+
+    void SetBuildButtonAffordable()
+    {
+        /*
+        foreach (var btn in buildButtons)
+        {
+            Text[] buttonLabels = btn.GetComponentsInChildren<Text>();
+            Button btnTemp = GameObject.Find(btn.name).GetComponent<Button>();
+            // btnTemp.interactable = true;
+
+            foreach (Text label in buttonLabels)
+            {
+                if (label.name == "Gold Cost")
+                {
+                    int towerCost = Convert.ToInt32(label.text.Substring(0, 2));
+
+                    if (gold < towerCost)
+                    {
+                        btnTemp.interactable = false;
+                    }
+                    else { }
+                }
+            }
+        }
+
+        */
+    }
+
+    private void ClearHighlightedTowers()
+    {
+        foreach (var tower in towers.Values.Where(t => t.towerIsHighlighted))
+        {
+            tower.UnHighlightTower();
+        }
+    }
+
+    void PositionSellPanel()
+    {
+        //If there is a selected tower:
+        if (selectedTower != null)
+        {
+            //Convert tower world position, moved forward by 8 units, to screen space:
+            var screenPosition = Camera.main.WorldToScreenPoint(
+                selectedTower.transform.position + Vector3.forward * 30
+            );
+
+            var screenPosition2 = Camera.main.WorldToScreenPoint(
+                selectedTower.transform.position + Vector3.right * 40 + Vector3.forward * 8
+            );
+
+            //Apply the position to the tower selling panel:
+            //towerSellingPanel.position = screenPosition;
+            //towerUpgradePanel.position = screenPosition2;
+            towerActionsPanel.position = screenPosition;
+        }
+    }
+    #endregion
+
+
+
+    public void OnExchangeLivesForGold()
+    {
+        if (remainingLives > 5)
+        {
+            gold += 5;
+            remainingLives -= 5;
+            SetBuildButtonAffordable();
+        }
+    }
+
+    //Unity events:
+    void Start()
+    {
+        buildButtonPanel.SetActive(false);
+
+        targetPosition = trans.position;
+        GroundEnemy.path = new NavMeshPath();
+        UpdateEnemyPath();
+    }
+
+    void OnGUI()
+    {
+        // GUI.Label(new Rect(300, 100, 100, 20), "Hello World!");
+
+        //Debug.Log("enemies: " + enemies.Count);
+        UpdateEmemyHealthLabel();
+    }
 
     void Update()
     {
@@ -1280,15 +1422,5 @@ public class Player : MonoBehaviour
         }
         else
             PlayModeLogic();
-    }
-
-    public void OnSetDifficulty(int difficulty)
-    {
-        DifficultyFactor = difficulty;
-        SetDifficultySettings();
-        settingsPanel.gameObject.SetActive(false);
-        gamePlayPanel.gameObject.SetActive(true);
-        buildButtonPanel.SetActive(true);
-        SetAvailableBuildButtons();
     }
 }

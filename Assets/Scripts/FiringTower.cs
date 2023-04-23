@@ -35,7 +35,7 @@ public class FiringTower : TargetingTower
     public float projectileSpeed = 60;
 
     [HideInInspector]
-    protected Enemy targetedEnemy;
+    public Enemy targetedEnemy;
 
     [HideInInspector]
     protected float lastFireTime = Mathf.NegativeInfinity;
@@ -58,6 +58,8 @@ public class FiringTower : TargetingTower
                 (to - from).normalized,
                 Vector3.up
             );
+
+            Debug.Log("desiredRotation: " + desiredRotation);
 
             //Slerp current rotation towards the desired rotation:
             aimer.rotation = Quaternion.Slerp(aimer.rotation, desiredRotation, .08f);

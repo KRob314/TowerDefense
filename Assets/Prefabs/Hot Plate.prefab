@@ -225,8 +225,8 @@ MonoBehaviour:
   upgradeCost: 6
   upgradeCostForRateOfFire: 10
   canUpgradeDamage: 1
-  canUpgradeSpeed: 1
-  canUpgradeRange: 1
+  canUpgradeSpeed: 0
+  canUpgradeRange: 0
   defaultMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}
   disabledMaterial: {fileID: 2100000, guid: 57544c1696b926d44812623648d8e580, type: 2}

@@ -57,7 +57,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1922381184631675873}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.084021, y: 2.9999847, z: -43.450188}
+  m_LocalPosition: {x: -14.084021, y: 0, z: -43.450188}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -116,8 +116,8 @@ MonoBehaviour:
   canAttackGround: 1
   trans: {fileID: 1922381184631675876}
   projectileSpawnPoint: {fileID: 1922381184459345010}
-  aimer: {fileID: 0}
-  fireInterval: 0.1
+  aimer: {fileID: 8227582224729652403}
+  fireInterval: 0.08
   projectilePrefab: {fileID: 4162537852074558535, guid: 4c95aade1d4bbd04798e59a2905e52e2, type: 3}
   damage: 2
   projectileSpeed: 100

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArcingProjectile : Projectile
+public class MortarProjectile : Projectile
 {
     public Transform trans;
 
@@ -28,6 +28,8 @@ public class ArcingProjectile : Projectile
 
     private bool hasShotUp = false;
 
+    // private ParticleSystem particleSystem;
+
     //Time.time at which we spawned.
     private float spawnTime;
     private float FractionOfDistanceTraveled
@@ -42,6 +44,8 @@ public class ArcingProjectile : Projectile
 
     protected override void OnSetup()
     {
+        // particleSystem = GetComponent<ParticleSystem>();
+        // particleSystem.Pause();
         //Set initial position to our current position, and target position to the target enemy position:
         initialPosition = trans.position;
         targetPosition = targetEnemy.trans.position;
@@ -59,25 +63,45 @@ public class ArcingProjectile : Projectile
 
     void Update()
     {
+        if (!hasShotUp)
+            MoveUp();
+        else
+            MoveForward();
+    }
+
+    void MoveForward()
+    {
         Vector3 currentPosition = trans.position;
-        currentPosition.y = 0;
+        //currentPosition.y = 0;
 
         currentPosition = Vector3.MoveTowards(
             currentPosition,
             targetPosition,
             speed * Time.deltaTime
         );
-        currentPosition.y = Mathf.Lerp(
-            initialPosition.y,
-            targetPosition.y,
-            curve.Evaluate(FractionOfDistanceTraveled)
-        );
+
         trans.position = currentPosition;
 
         if (currentPosition == targetPosition)
             Explode();
     }
 
+    void MoveUp()
+    {
+        Vector3 currentPosition = trans.position;
+        Vector3 targetPosition = new Vector3(currentPosition.x, 45, currentPosition.z);
+
+        currentPosition = Vector3.MoveTowards(
+            currentPosition,
+            targetPosition,
+            speed * Time.deltaTime
+        );
+
+        trans.position = currentPosition;
+
+        if (trans.position.y >= 45)
+            hasShotUp = true;
+    }
 
     void Explode()
     {
