@@ -21,6 +21,10 @@ public class SeekingProjectile : Projectile
         {
             targetPosition = targetEnemy.projectileSeekPoint.position;
         }
+        else
+        {
+            Debug.Log("target is null");
+        }
 
         //point towards the target position
         trans.forward = (targetPosition - trans.position).normalized;

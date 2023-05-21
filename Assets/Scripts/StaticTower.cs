@@ -21,7 +21,7 @@ public class StaticTower : TargetingTower
     public Transform aimer;
 
     [Tooltip("Seconds between each projectile being fired.")]
-    public float fireInterval = .5f;
+    public float fireInterval = 0.0f;
 
     [Tooltip("Reference to the projectile prefab that should be fired.")]
     public Projectile projectilePrefab;
@@ -64,9 +64,16 @@ public class StaticTower : TargetingTower
         proj.Setup(damage, projectileSpeed, targetedEnemy);
     }
 
+    public void RotateBarrel(float yPos)
+    {
+        aimer.Rotate(0.0f, yPos, 0.0f, Space.Self);
+    }
+
     //Unity events:
     protected virtual void Update()
     {
+        GetNextTarget();
+
         if (!isActive)
             return;
 

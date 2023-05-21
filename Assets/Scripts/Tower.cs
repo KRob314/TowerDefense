@@ -53,4 +53,9 @@ public class Tower : MonoBehaviour
             isActive = true;
         }
     }
+
+    public override string ToString()
+    {
+        return gameObject.name.Replace("(Clone)", "");
+    }
 }

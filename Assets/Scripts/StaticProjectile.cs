@@ -7,7 +7,7 @@ public class StaticProjectile : Projectile
     [Header("References")]
     public Transform trans;
 
-        [Tooltip("Radius of the explosion.")]
+    [Tooltip("Radius of the explosion.")]
     public float explosionRadius = 25;
 
     [Tooltip("Layer mask to use when detecting enemies the explosion will affect.")]
@@ -21,7 +21,10 @@ public class StaticProjectile : Projectile
     protected override void OnSetup() { }
 
     // Start is called before the first frame update
-    void Start() { }
+    void Start()
+    {
+        transform.Rotate(90f, 0, 0);
+    }
 
     // Update is called once per frame
     void Update()
@@ -49,38 +52,36 @@ public class StaticProjectile : Projectile
 
     private void OnTriggerEnter(Collider other)
     {
-
-        if(!other.CompareTag("Enemy"))
+        if (!other.CompareTag("Enemy"))
             return;
 
         Debug.Log("collision");
 
-var enemy = other.GetComponent<Enemy>();
-enemy.TakeDamage(damage);
+        var enemy = other.GetComponent<Enemy>();
+        enemy.TakeDamage(damage);
 
-
-/*
-        Collider[] enemyColliders = Physics.OverlapSphere(
-            trans.position,
-            explosionRadius,
-            enemyLayerMask.value
-        );
-
-        for (int i = 0; i < enemyColliders.Length; i++)
-        {
-            var enemy = enemyColliders[i].GetComponent<Enemy>();
-
-            if (enemy != null)
-            {
-                float distToEnemy = Vector3.Distance(trans.position, enemy.trans.position);
-                float damageToDeal =
-                    damage * (1 - Mathf.Clamp(distToEnemy / explosionRadius, 0f, 1f));
-                enemy.TakeDamage(damageToDeal);
-            }
-        }
-
-        Destroy(gameObject);
-    */
+        /*
+                Collider[] enemyColliders = Physics.OverlapSphere(
+                    trans.position,
+                    explosionRadius,
+                    enemyLayerMask.value
+                );
+        
+                for (int i = 0; i < enemyColliders.Length; i++)
+                {
+                    var enemy = enemyColliders[i].GetComponent<Enemy>();
+        
+                    if (enemy != null)
+                    {
+                        float distToEnemy = Vector3.Distance(trans.position, enemy.trans.position);
+                        float damageToDeal =
+                            damage * (1 - Mathf.Clamp(distToEnemy / explosionRadius, 0f, 1f));
+                        enemy.TakeDamage(damageToDeal);
+                    }
+                }
+        
+                Destroy(gameObject);
+            */
 
         /*
         if (other.CompareTag("Powerup"))

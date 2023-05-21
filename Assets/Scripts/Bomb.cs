@@ -6,6 +6,8 @@ public class Bomb : TargetingTower
 {
     public Transform trans;
 
+    public ParticleSystem explosionPrefab;
+
     [Tooltip("Layer mask to use when detecting enemies the explosion will affect.")]
     public LayerMask enemyLayerMask;
 
@@ -19,7 +21,9 @@ public class Bomb : TargetingTower
 
     void Update()
     {
-        if (targeter.TargetsAreAvailable && explodeTime == Mathf.NegativeInfinity)
+        //if (explodeTime == Mathf.NegativeInfinity)
+        //{
+        if (targeter.TargetsAreAvailable)
         {
             if (triggerStartTime == Mathf.NegativeInfinity)
             {
@@ -27,12 +31,16 @@ public class Bomb : TargetingTower
                 var particleSystem = GetComponent<ParticleSystem>();
                 particleSystem.Play();
             }
-
-            if ((Time.time - triggerStartTime) > secondsToDetonateAfterTrigger)
-            {
-                Explode();
-            }
         }
+
+        if (
+            triggerStartTime != Mathf.NegativeInfinity
+            && (Time.time - triggerStartTime) > secondsToDetonateAfterTrigger
+        )
+        {
+            Explode();
+        }
+        //}
 
         // Debug.Log(explodeTime);
         //Debug.Log(Time.time - explodeTime);
@@ -75,7 +83,12 @@ public class Bomb : TargetingTower
             }
         }
 
-        gameObject.SetActive(false);
-        //Destroy(gameObject);
+        explosionPrefab = Instantiate(
+            explosionPrefab,
+            trans.position,
+            Quaternion.LookRotation(Vector3.back)
+        );
+
+        Destroy(gameObject);
     }
 }

@@ -214,6 +214,9 @@ public class Player : MonoBehaviour
     private GameObject upgradeSpeedButton = null;
     private GameObject upgradeRangeButton = null;
 
+    //private GameObject turnBarrelButton = null;
+    // private GameObject turnBarrelButton1 = null;
+
     private List<GameObject> buildButtons = new List<GameObject>();
 
     private int numberToMakeEnemyArmored
@@ -221,11 +224,11 @@ public class Player : MonoBehaviour
         get
         {
             if (level <= 5)
-                return 2 + DifficultyFactor;
+                return 0;
             else if (level <= 10)
-                return 8 + DifficultyFactor;
-            else if (level <= 15)
                 return 3 + DifficultyFactor;
+            else if (level <= 15)
+                return 6 + DifficultyFactor;
             else
                 return 30 + DifficultyFactor;
 
@@ -394,9 +397,12 @@ public class Player : MonoBehaviour
         if (towerPrefabToBuild != null)
         {
             //If there is no tower in that slot and we have enough gold to build the selected tower:
-            if (!towers.ContainsKey(highlighter.position) && gold >= towerPrefabToBuild.goldCost)
+            if (!towers.ContainsKey(highlighter.position))
             {
-                BuildTower(towerPrefabToBuild, highlighter.position);
+                if (gold >= towerPrefabToBuild.goldCost)
+                {
+                    BuildTower(towerPrefabToBuild, highlighter.position);
+                }
             }
             else //selected area already has a tower so guessing they want to upgrade
             {
@@ -443,7 +449,7 @@ public class Player : MonoBehaviour
 
             name.text = tower.name;
             cost.text = $"Cost: {towerTemp.goldCost.ToString()}";
-            speed.text = $"Speed: {100 - (towerTemp.fireInterval * 100)}";
+            speed.text = $"Speed: {GetTowerSpeedName(towerTemp.fireInterval)}";
             damage.text = $"Damage: {towerTemp.damage}";
             range.text = $"Range: {towerTemp.range}";
 
@@ -499,7 +505,7 @@ public class Player : MonoBehaviour
 
                 case "Mortar Tower":
                     description.text =
-                        "Launches explosive shells in high-arcing ballistic trajectories dealing splash damage. Can upgrade damage, speed, and range.";
+                        "Launches explosive shells in high-arcing ballistic trajectories dealing splash damage. Can upgrade damage.";
                     targets.text = targetsStr;
                     break;
             }
@@ -523,7 +529,7 @@ public class Player : MonoBehaviour
 
         name.text = tower.name;
         cost.text = $"Cost: {towerTemp.goldCost.ToString()}";
-        // speed.text = $"Speed: {100 - (towerTemp.fireInterval * 100)}";
+        speed.text = name.text == "Rail Gun Tower" ? "Speed: Slow" : "Speed: N/A";
         //damage.text = $"Damage: {towerTemp.damage}";
         range.text = $"Range: {towerTemp.range}";
 
@@ -537,17 +543,22 @@ public class Player : MonoBehaviour
             case "Slow Plate":
                 description.text =
                     "A passable area that slows down nearby enemies. Can upgrade slow down rate.";
-                targets.text = "Targets: Ground, Aerial";
+                targets.text = "Targets: Ground";
                 break;
             case "Bomb Plate":
                 description.text =
-                    @"A passable bomb that explodes 1 second after the first enemy has entered its range. Can upgrade damage.";
-                targets.text = "Targets: Ground, Aerial";
+                    @"A passable bomb that explodes 1 second after the first enemy has entered its range. Only live for 1 level. Can upgrade damage.";
+                targets.text = "Targets: Ground";
                 break;
             case "AA Bomb":
                 description.text =
-                    @"A passable bomb that will detonate 1 second after the first enemy has entered its range. Can upgrade damage.";
+                    @"A passable bomb that will detonate 1 second after the first enemy has entered its range. Only live for 1 level. Can upgrade damage.";
                 targets.text = "Targets: Aerial";
+                break;
+            case "Rail Gun Tower":
+                description.text =
+                    @"Fixed barrel that shoots a long-distance penetrating projectile through all enemies in its path. Cannot upgrade.";
+                targets.text = "Targets: Ground";
                 break;
         }
     }
@@ -571,6 +582,8 @@ public class Player : MonoBehaviour
             upgradeSpeedButton = GameObject.Find("Upgrade RateOfFire Button");
             upgradeRangeButton = GameObject.Find("Upgrade Range Button");
             upgradeDamageQuadButton = GameObject.Find("Upgrade Damage Button 2");
+            // turnBarrelButton = GameObject.Find("Turn Barrel Button");
+            //turnBarrelButton1 = GameObject.Find("Turn Barrel Button (1)");
         }
 
         sellRefundText.text =
@@ -588,7 +601,28 @@ public class Player : MonoBehaviour
             $"+ Speed: {selectedTower.upgradeCostForRateOfFire.ToString()} gold";
         upgradeRangeCostText.text = $"+ Range: {selectedTower.upgradeCost.ToString()} gold";
 
-        if (selectedTower is FiringTower)
+        /*
+                if (selectedTower is StaticTower)
+                {
+                    turnBarrelButton.SetActive(true);
+                    turnBarrelButton1.SetActive(true);
+                }
+                else
+                {
+                    turnBarrelButton.SetActive(false);
+                    turnBarrelButton1.SetActive(false);
+                }
+                */
+
+
+        if (selectedTower is StaticTower)
+        {
+            var towerTemp = (StaticTower)selectedTower;
+
+            towerStatsText.text =
+                $"{selectedTower.ToString()} {Environment.NewLine} ------------------{Environment.NewLine}Dmg: {towerTemp.damage}{Environment.NewLine}Range: {towerTemp.range}:";
+        }
+        else if (selectedTower is FiringTower)
         {
             var towerTemp = (FiringTower)selectedTower;
 
@@ -600,7 +634,7 @@ public class Player : MonoBehaviour
 
 
             towerStatsText.text =
-                $"Upgrades $: {selectedTower.upgradesBought} {Environment.NewLine}Dmg: {towerTemp.damage} {Environment.NewLine}Rate of fire: {towerTemp.fireInterval} {Environment.NewLine}Range: {towerTemp.range}";
+                $"{selectedTower.ToString()} {Environment.NewLine} ------------------{Environment.NewLine}Upgrades $: {selectedTower.upgradesBought} {Environment.NewLine}Dmg: {towerTemp.damage} {Environment.NewLine}Rate of fire: {towerTemp.fireInterval} {Environment.NewLine}Range: {towerTemp.range}";
         }
         else if (selectedTower is TargetingTower)
         {
@@ -609,12 +643,12 @@ public class Player : MonoBehaviour
             if (towerTemp.name.ToString().Contains("Bomb Plate"))
             {
                 towerStatsText.text =
-                    $"Dmg: {towerTemp.damagePerSecond}{Environment.NewLine}Range: {towerTemp.range}:";
+                    $"{selectedTower.ToString()} {Environment.NewLine} ------------------{Environment.NewLine}Dmg: {towerTemp.damagePerSecond}{Environment.NewLine}Range: {towerTemp.range}:";
             }
             else
             {
                 towerStatsText.text =
-                    $"Dmg/s: {towerTemp.damagePerSecond}{Environment.NewLine}Speed Reduction: {towerTemp.slowDownRate}:";
+                    $"{selectedTower.ToString()} {Environment.NewLine} ------------------{Environment.NewLine}Dmg/s: {towerTemp.damagePerSecond}{Environment.NewLine}Speed Reduction: {towerTemp.slowDownRate}:";
             }
         }
 
@@ -626,8 +660,10 @@ public class Player : MonoBehaviour
         if (!selectedTower.canUpgradeSpeed)
         {
             upgradeSpeedButton.SetActive(false);
-            if (selectedTower.name != "Barricade")
+            if (selectedTower.name != "Barricade" && selectedTower.canUpgradeDamage)
                 upgradeDamageQuadButton.SetActive(true);
+            else
+                upgradeDamageQuadButton.SetActive(false);
         }
         else
         {
@@ -679,6 +715,12 @@ public class Player : MonoBehaviour
         if (selectedTower != null)
             //Sell it:
             SellTower(selectedTower);
+    }
+
+    public void OnRotateBarrelButtonClicked(float yPos)
+    {
+        var towerTemp = selectedTower as StaticTower;
+        towerTemp.RotateBarrel(yPos);
     }
 
     public void OnUpgradeTowerDamageButtonClicked(int multiplier = 1)
@@ -734,7 +776,7 @@ public class Player : MonoBehaviour
                     return;
 
                 // Debug.Log("Tower Damage: " + towerTemp.damage);
-                towerTemp.fireInterval -= .05f;
+                towerTemp.fireInterval = (float)Math.Round(towerTemp.fireInterval - .05, 2);
                 gold -= Mathf.CeilToInt(towerTemp.upgradeCostForRateOfFire);
             }
             else if (selectedTower is HotPlate)
@@ -830,7 +872,7 @@ public class Player : MonoBehaviour
         enemiesPerLevel += DifficultyFactor;
         goldRewardPerLevel -= DifficultyFactor;
         remainingLives -= DifficultyFactor;
-        armoredEnemyFactor = DifficultyFactor + (int)(DifficultyFactor * 0.75);
+        armoredEnemyFactor = DifficultyFactor + (int)(DifficultyFactor * 0.25);
     }
 
     private void SetBuildButtons()
@@ -860,20 +902,30 @@ public class Player : MonoBehaviour
         SetAvailableBuildButtons();
     }
 
-    #endregion
-
-    void DeselectButtons()
+    public string GetTowerSpeedName(float fireRate)
     {
-        if (!buildButtons.Any())
-            SetBuildButtons();
+        //Debug.Log(fireRate);
 
-        for (int i = 0; i < buildButtons.Count; i++)
+        if (fireRate == 0f)
         {
-            Image selectedBuildButtonImageTemp = buildButtons[i].GetComponent<Image>();
-
-            selectedBuildButtonImageTemp.color = Color.white;
+            return "N/A";
+        }
+        else if (fireRate <= .5f)
+        {
+            return "Fast";
+        }
+        else if (fireRate <= 1.5)
+        {
+            return "Medium";
+        }
+        else
+        {
+            return "Slow";
         }
     }
+    #endregion
+
+
 
     #region Game Methods
     void UpdateEnemyPath()
@@ -1093,7 +1145,7 @@ public class Player : MonoBehaviour
         highlighter.gameObject.SetActive(false);
         ClearHighlightedTowers();
 
-        if (level == 12)
+        if (level == 10)
         {
             enemyInfoPanel.gameObject.SetActive(false);
         }
@@ -1128,7 +1180,7 @@ public class Player : MonoBehaviour
             gold += 5;
         }
 
-        if (level == 12)
+        if (level == 10)
         {
             enemyInfoPanel.gameObject.SetActive(true);
         }
@@ -1204,6 +1256,19 @@ public class Player : MonoBehaviour
 
 
     #region Show/Hide, Positioning, clean up
+    void DeselectButtons()
+    {
+        if (!buildButtons.Any())
+            SetBuildButtons();
+
+        for (int i = 0; i < buildButtons.Count; i++)
+        {
+            Image selectedBuildButtonImageTemp = buildButtons[i].GetComponent<Image>();
+
+            selectedBuildButtonImageTemp.color = Color.white;
+        }
+    }
+
     void SetTowersActive()
     {
         foreach (var tower in towers.Values)
@@ -1298,7 +1363,7 @@ public class Player : MonoBehaviour
             laserBuildBtn.interactable = true;
         }
 
-        if (level < 15)
+        if (level < 25)
         {
             mortarBuildBtn.interactable = false;
             railGunBuildBtn.interactable = false;
@@ -1358,15 +1423,19 @@ public class Player : MonoBehaviour
             );
 
             var screenPosition2 = Camera.main.WorldToScreenPoint(
-                selectedTower.transform.position + Vector3.right * 40 + Vector3.forward * 8
+                selectedTower.transform.position + Vector3.right * 35 + Vector3.back * 8
             );
+
+            //Debug.Log(screenPosition);
+            //  Debug.Log(screenPosition2);
 
             //Apply the position to the tower selling panel:
             //towerSellingPanel.position = screenPosition;
             //towerUpgradePanel.position = screenPosition2;
-            towerActionsPanel.position = screenPosition;
+            towerActionsPanel.position = screenPosition2;
         }
     }
+
     #endregion
 
 

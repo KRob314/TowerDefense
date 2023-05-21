@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FiringTower : TargetingTower
 {
+    public ParticleSystem explosionPrefab;
+
     [Tooltip("Can the tower attack flying enemies?")]
     public bool canAttackFlying = true;
     public bool canAttackGround = true;
@@ -20,7 +22,7 @@ public class FiringTower : TargetingTower
     public Transform aimer;
 
     [Tooltip("Seconds between each projectile being fired.")]
-    public float fireInterval = .5f;
+    public float fireInterval = 0.0f;
 
     [Tooltip("Reference to the projectile prefab that should be fired.")]
     public Projectile projectilePrefab;
@@ -59,7 +61,7 @@ public class FiringTower : TargetingTower
                 Vector3.up
             );
 
-            Debug.Log("desiredRotation: " + desiredRotation);
+            //Debug.Log("desiredRotation: " + desiredRotation);
 
             //Slerp current rotation towards the desired rotation:
             aimer.rotation = Quaternion.Slerp(aimer.rotation, desiredRotation, .08f);
@@ -69,6 +71,14 @@ public class FiringTower : TargetingTower
     protected void GetNextTarget()
     {
         targetedEnemy = targeter.GetClosestEnemy(trans.position);
+
+        if (targetedEnemy == null)
+        {
+            if (explosionPrefab != null)
+            {
+                explosionPrefab.Pause();
+            }
+        }
     }
 
     protected virtual void Fire()
@@ -85,6 +95,11 @@ public class FiringTower : TargetingTower
 
         //Setup the projectile with damage, speed, and target enemy:
         proj.Setup(damage, projectileSpeed, targetedEnemy);
+
+        if (explosionPrefab != null)
+        {
+            explosionPrefab.Play();
+        }
     }
 
     //Unity events:
@@ -124,5 +139,13 @@ public class FiringTower : TargetingTower
         //Else if there is no targeted enemy and there are targets available
         else if (targeter.TargetsAreAvailable)
             GetNextTarget();
+    }
+
+    protected override void Start()
+    {
+        targeter.SetRange(range);
+
+        if (explosionPrefab != null)
+            explosionPrefab.Pause();
     }
 }
