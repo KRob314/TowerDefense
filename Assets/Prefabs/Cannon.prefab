@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 8534408613507334436}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.084021, y: 2.9999847, z: -43.450188}
-  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -97,6 +97,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 0
+  groundDamage: 0
+  airDamage: 0
+  armorDamage: 0
   speed: 0
   targetEnemy: {fileID: 0}
   trans: {fileID: 2498884556111235520}

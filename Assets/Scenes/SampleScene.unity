@@ -3876,7 +3876,7 @@ MonoBehaviour:
   movementSmoothing: 0.75
   scrollSensitivity: 1.6
   DifficultyLevel: 2
-  gold: 600
+  gold: 60
   selectedBuildButtonColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
   buildButtonPanel: {fileID: 1990327783}
   gameLostPanel: {fileID: 1239538381}

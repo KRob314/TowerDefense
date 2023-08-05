@@ -224,9 +224,9 @@ public class Player : MonoBehaviour
         get
         {
             if (level <= 5)
-                return 0;
+                return -50;
             else if (level <= 10)
-                return 3 + DifficultyFactor;
+                return DifficultyFactor;
             else if (level <= 15)
                 return 6 + DifficultyFactor;
             else
@@ -798,10 +798,14 @@ public class Player : MonoBehaviour
             if (gold - Mathf.CeilToInt(selectedTower.upgradeCost) < 0)
                 return;
 
-            selectedTower.upgradesBought += selectedTower.upgradeCost;
             if (selectedTower is TargetingTower)
             {
                 TargetingTower towerTemp = (TargetingTower)selectedTower;
+
+                if (towerTemp.range > 199)
+                    return;
+
+                selectedTower.upgradesBought += selectedTower.upgradeCost;
                 towerTemp.range += 2;
                 towerTemp.targeter.SetRange(towerTemp.range);
                 gold -= Mathf.CeilToInt(towerTemp.upgradeCost);
@@ -1226,30 +1230,23 @@ public class Player : MonoBehaviour
 
     void UpdateEmemyHealthLabel()
     {
-        List<int> enemyIndexesToRemove = new List<int>();
         if (enemies.Count > 0)
         {
             int spaceIndex = 0;
             for (int i = 0; i < enemies.Count; i++)
             {
                 var enemy = enemies[i];
-                //Debug.Log(i + " - " + enemy.trans.position.y);
-                //Debug.Log(enemy.name);
+
                 if (enemy.trans != null)
                 {
                     GUI.Label(new Rect(100, 10 + spaceIndex, 100, 20), enemy.health.ToString());
                 }
                 else
                 {
-                    enemyIndexesToRemove.Add(i);
+                    enemies.RemoveAt(i);
                 }
                 spaceIndex += 20;
             }
-        }
-
-        for (int i = 0; i < enemyIndexesToRemove.Count; i++)
-        {
-            enemies.RemoveAt(enemyIndexesToRemove[i]);
         }
     }
     #endregion
@@ -1273,7 +1270,8 @@ public class Player : MonoBehaviour
     {
         foreach (var tower in towers.Values)
         {
-            tower.SetActive();
+            if (tower != null)
+                tower.SetActive();
         }
     }
 
@@ -1281,7 +1279,8 @@ public class Player : MonoBehaviour
     {
         foreach (var tower in towers.Values)
         {
-            tower.SetInactive();
+            if (tower != null)
+                tower.SetInactive();
         }
     }
 
@@ -1298,7 +1297,8 @@ public class Player : MonoBehaviour
         )
         {
             towers.Remove(i.Key);
-            Destroy(i.Value.gameObject);
+            if (i.Value != null)
+                Destroy(i.Value.gameObject);
         }
     }
 

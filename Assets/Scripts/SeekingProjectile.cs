@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SeekingProjectile : Projectile
 {
@@ -20,10 +21,6 @@ public class SeekingProjectile : Projectile
         if (targetEnemy != null)
         {
             targetPosition = targetEnemy.projectileSeekPoint.position;
-        }
-        else
-        {
-            Debug.Log("target is null");
         }
 
         //point towards the target position

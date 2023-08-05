@@ -17,6 +17,8 @@ public class Targeter : MonoBehaviour
         get { return enemies.Count > 0; }
     }
 
+    //private List<EnemyDistance> enemyDistances = new List<EnemyDistance>();
+
     //Methods:
     public void SetRange(int range)
     {
@@ -37,6 +39,7 @@ public class Targeter : MonoBehaviour
 
     public Enemy GetClosestEnemy(Vector3 point)
     {
+        //enemyDistances = new List<EnemyDistance>();
         //Lowest distance we've found so far:
         float lowestDistance = Mathf.Infinity;
 
@@ -53,12 +56,14 @@ public class Targeter : MonoBehaviour
             {
                 //Remove it and continue the loop at the same index:
                 enemies.RemoveAt(i);
+
                 i -= 1;
             }
             else
             {
                 //Get distance from the enemy to the given point:
                 float dist = Vector3.Distance(point, enemy.trans.position);
+                //enemyDistances.Add(new EnemyDistance() { Enemy = enemy, Distance = dist });
 
                 if (dist < lowestDistance)
                 {
@@ -91,3 +96,11 @@ public class Targeter : MonoBehaviour
         }
     }
 }
+
+/*
+public class EnemyDistance
+{
+    public Enemy Enemy { get; set; }
+    public float Distance { get; set; }
+}
+*/

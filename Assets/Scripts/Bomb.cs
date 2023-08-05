@@ -83,12 +83,16 @@ public class Bomb : TargetingTower
             }
         }
 
-        explosionPrefab = Instantiate(
-            explosionPrefab,
-            trans.position,
-            Quaternion.LookRotation(Vector3.back)
-        );
+        if (explosionPrefab != null)
+        {
+            explosionPrefab = Instantiate(
+                explosionPrefab,
+                trans.position,
+                Quaternion.LookRotation(Vector3.back)
+            );
+        }
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+        // Destroy(gameObject);
     }
 }

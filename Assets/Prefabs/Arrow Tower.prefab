@@ -270,6 +270,7 @@ MonoBehaviour:
   range: 45
   damagePerSecond: 0
   slowDownRate: 2
+  explosionPrefab: {fileID: 0}
   canAttackFlying: 1
   canAttackGround: 1
   trans: {fileID: 5739652141152591556}
@@ -279,6 +280,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 6432949552328935016, guid: b3e20e2ba48b54a4ebc9b082ee24a34c, type: 3}
   damage: 4
   projectileSpeed: 60
+  targetedEnemy: {fileID: 0}
 --- !u!208 &8463282877792888301
 NavMeshObstacle:
   m_ObjectHideFlags: 0

@@ -5005,6 +5005,7 @@ MonoBehaviour:
   damagePerSecond: 60
   slowDownRate: 2
   trans: {fileID: 2637170803805287436}
+  explosionPrefab: {fileID: 0}
   enemyLayerMask:
     serializedVersion: 2
     m_Bits: 256
